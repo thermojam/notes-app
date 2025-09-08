@@ -1,11 +1,11 @@
-# Основы "node.js"
+# Basics of "node.js"
 
-## Цель урока — понять принцип работы с Node.js
+## The goal of the lesson is to understand the principle of working with Node.js
 
-*   **В данном уроке**
-    *   установите Node.js и научитесь запускать собственные скрипты с его помощью;
-    *   научитесь считывать консольные параметры в программе;
-    *   познакомитесь с двумя стандартными модулями Node.js — FS и Path;
-    *   научитесь программно читать данные из файла и записывать что-либо в него;
-    *   познакомитесь с двумя полезными сторонними библиотеками — “yargs” и “chalk”;
-    *   разработаете консольное приложение для работы с заметками на Node.js.
+
+* install Node.js and learn how to run your own scripts with it;
+* learn how to read console parameters in a program;
+* get acquainted with two standard Node.js modules - FS and Path;
+* learn how to programmatically read data from a file and write something to it;
+* get acquainted with two useful third-party libraries - “yargs” and “chalk”;
+* develop a console application for working with notes on Node.js.
