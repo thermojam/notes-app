@@ -1,57 +1,18 @@
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-import { addNote, getNotes, removeNote } from "./notes-controller.js";
-import chalk from "chalk";
+// Модуль http позволяет создавать HTTP-серверы и клиентские запросы. Основное применение — создание веб-серверов.
+import http, { createServer } from 'http';
+import chalk from 'chalk';
 
-yargs(hideBin(process.argv))
-    .command({
-        command: "add",
-        describe: "Add new note to list",
-        builder: {
-            title: {
-                type: "string",
-                describe: "Note title",
-                demandOption: true,
-            },
-        },
-        async handler({ title }) {
-            await addNote(title);
-        },
-    })
+// Запускает сервер на указанном порту
+const port = 3030;
 
-    .command({
-        command: "list",
-        describe: "Print all notes",
-        async handler() {
-            const notes = await getNotes();
-            if (notes.length === 0) {
-                console.log(chalk.red("No notes found"));
-            } else {
-                console.log(chalk.blueBright.bold("All notes:"));
-                notes.forEach((n, i) => {
-                    console.log(
-                        chalk.magenta(`#${i + 1}`),
-                        chalk.green(`(${n.id})`),
-                        chalk.white.bold(n.title)
-                    );
-                });
-            }
-        },
-    })
+// Создаёт HTTP-сервер с обработчиком запросов
+const server = http.createServer((req, res) => {
 
-    .command({
-        command: "remove",
-        describe: "Remove note by id",
-        builder: {
-            id: {
-                type: "string",
-                describe: "Note id",
-                demandOption: true,
-            },
-        },
-        async handler({ id }) {
-            await removeNote(id);
-        },
-    })
+    // Завершает ответ и отправляет данные клиенту
+    res.end('Hello from server!!!')
+})
 
-    .parse();
+// Номер порта для прослушивания (параметр listen)
+server.listen(port, () => {
+    console.log(chalk.green(`Server is ready on ${port}`))
+})
