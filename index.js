@@ -1,47 +1,34 @@
-// Модуль http позволяет создавать HTTP-серверы и клиентские запросы. Основное применение — создание веб-серверов.
-import { createServer } from "http";
-import chalk from "chalk";
-import fs from "fs/promises";
-import path from "path";
+// Express ускоряет и упрощает разработку веб-приложений по сравнению с использованием только стандартного модуля http в Node.js
+// Меньше кода для создания серверов и API, готовые решения для типичных задач
+// Встроенная поддержка шаблонизаторов для генерации HTML
+import express from 'express'
 import { fileURLToPath } from "url";
-import { addNote } from './notes-controller.js'
+import chalk from "chalk";
+import path from "path";
+import { addNote } from './notes-controller.js';
 
-
-// Запускает сервер на указанном порту
 const port = 3030;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const basePath = path.join(__dirname, "pages");
 
-// Создаёт HTTP-сервер с обработчиком запросов
-const server = createServer(async (req, res) => {
-    if (req.method === "GET") {
-        const content = await fs.readFile(path.join(basePath, "index.html"));
-        res.writeHead(200, { "content-type": "text/html",})
-        res.end(content);
-        } else if (req.method === "POST") {
-        const body = []
-        res.writeHead(200, {
-            'content-type': 'text/plain; charset=utf-8'
-        })
-        
-        // Событие data позволяет обрабатывать данные по частям, не дожидаясь полной загрузки.
-        req.on('data',  data => {
-            body.push(Buffer.from(data))
-            // Buffer — это класс в Node.js, который предназначен для работы с бинарными данными.
-            // Он позволяет эффективно хранить и манипулировать двоичными данными, например, при работе с файлами, сетевыми потоками
-        })
+const app = express()
+// use используется для подключения middleware-функций к приложению Express
+app.use(express.urlencoded({
+    // используется библиотека qs, которая позволяет парсить более сложные вложенные объекты и структуры
+    extended: true
+}))
 
-        req.on('end', () => {
-           const title = body.toString().split('=')[1].replaceAll('+', ' ')
-           addNote(title)
-           res.end(`Title = ${title}`);
-        })
-    }
-});
+app.get('/', (req, res) => {
+    res.sendFile(path.join(basePath, "index.html"))
+})
+
+app.post('/', async (req, res) => {
+    await addNote(req.body.title)
+    res.sendFile(path.join(basePath, "index.html"))
+})
 
 // Номер порта для прослушивания (параметр listen)
-server.listen(port, () => {
+app.listen(port, () => {
     console.log(chalk.green(`Server is ready on ${port}`));
 });
