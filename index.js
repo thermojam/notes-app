@@ -1,40 +1,50 @@
-// Express ускоряет и упрощает разработку веб-приложений по сравнению с использованием только стандартного модуля http в Node.js
-// Меньше кода для создания серверов и API, готовые решения для типичных задач
-// Встроенная поддержка шаблонизаторов для генерации HTML
-import express from 'express'
+import express from "express";
+import path from "path";
 import chalk from "chalk";
-import { addNote, getNotes } from './notes-controller.js';
+import { fileURLToPath } from "url";
+import {
+    getNotes,
+    addNote,
+    removeNote,
+    updateNote,
+} from "./notes-controller.js";
 
-const port = 3030;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
+const port = 3000;
 
-// Позволяет задавать настройки, которые влияют на поведение Express-приложения
-app.set('view engine', 'ejs');
-app.set('views', 'pages');
+app.set("view engine", "ejs");
+app.set("views", path.resolve(__dirname, "pages"));
 
-// use используется для подключения middleware-функций к приложению Express
-app.use(express.urlencoded({
-    // используется библиотека qs, которая позволяет парсить более сложные вложенные объекты и структуры
-    extended: true
-}))
+app.use(express.static(path.resolve(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-app.get('/', async (req, res) => {
-    // Метод render используется для генерации HTML-кода на основе шаблона EJS и переданных данных
-    res.render('index', {
-        title: 'Express App',
-        notes: await getNotes()
-    })
-})
+app.get("/", async (req, res) => {
+    res.render("index", {
+        title: "Express App",
+        notes: await getNotes(),
+    });
+});
 
-app.post('/', async (req, res) => {
-    await addNote(req.body.title)
-    res.render('index', {
-        title: 'Express App',
-        notes: await getNotes()
-    })
-})
+app.post("/", async (req, res) => {
+    await addNote(req.body.title);
+    res.redirect("/");
+});
 
-// Номер порта для прослушивания (параметр listen)
+app.put("/:id", async (req, res) => {
+    const { title } = req.body;
+    await updateNote(req.params.id, title);
+    res.json({ success: true });
+});
+
+app.delete("/:id", async (req, res) => {
+    await removeNote(req.params.id);
+    res.json({ success: true });
+});
+
 app.listen(port, () => {
-    console.log(chalk.green(`Server is ready on ${port}`));
+    console.log(chalk.green(`Server is running on http://localhost:${port}`));
 });
