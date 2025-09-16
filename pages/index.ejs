@@ -9,17 +9,31 @@
             integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
             crossorigin="anonymous"
         />
-        <title>Node Simple Server</title>
+        <title><%= title %></title>
     </head>
     <body>
         <div class="container mt-5">
             <h1 class="mb-4">Welcome to Node Simple Server</h1>
             <form action="/" method="post" class="mb-2">
                 <div class="form-group">
-                    <input type="text" class="form-control mb-2" name="title" placeholder="Enter your text" required/>
+                    <input
+                        type="text"
+                        class="form-control mb-2"
+                        name="title"
+                        placeholder="Enter your text"
+                        required
+                    />
                 </div>
                 <button class="btn btn-primary" type="submit">Create</button>
             </form>
+        </div>
+
+        <div class="container px-0 mt-5 card">
+            <ul class="list-group">
+                <% for (let i = 0; i < notes.length; i++) { %>
+                <li class="list-group-item"><%= notes[i].title %></li>
+                <% } %>
+            </ul>
         </div>
     </body>
 </html>
