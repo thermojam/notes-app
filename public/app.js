@@ -1,30 +1,38 @@
-document.addEventListener("click", async (event) => {
-    const btn = event.target.closest("button[data-type]");
-    if (!btn) return;
+document.addEventListener("click", (event) => {
+    if (event.target.dataset.type === "remove") {
+        const id = event.target.dataset.id;
 
-    const type = btn.dataset.type;
-    const id = btn.dataset.id;
-    const li = btn.closest("li");
-
-    if (type === "remove") {
-        await fetch(`/${id}`, { method: "DELETE" });
-        li.remove();
+        remove(id).then(() => {
+            event.target.closest("li").remove();
+        });
     }
 
-    if (type === "edit") {
-        const span = li.querySelector(".note-title");
-        const oldTitle = span.textContent.trim();
-        const newTitle = prompt("Введите новое название:", oldTitle);
+    if (event.target.dataset.type === "edit") {
+        const id = event.target.dataset.id;
+        const editedTitleNode = event.target.closest("li").childNodes[0];
+        const editedTitle = editedTitleNode.textContent.trim();
+        const newTitle = prompt("Enter a new title:", editedTitle);
 
-        if (newTitle === null) return;
-        if (!newTitle.trim()) return alert("Название не может быть пустым");
+        if (!newTitle) {
+            return;
+        }
 
-        await fetch(`/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: newTitle.trim() }),
+        edit(id, newTitle).then(() => {
+            editedTitleNode.textContent = newTitle;
         });
-
-        span.textContent = newTitle.trim();
     }
 });
+
+async function remove(id) {
+    await fetch(`/${id}`, { method: "DELETE" });
+}
+
+async function edit(id, newTitle) {
+    await fetch(`/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({ title: newTitle }),
+    });
+}

@@ -1,43 +1,67 @@
-import { readFile, writeFile } from "fs/promises";
-import chalk from "chalk";
+const fs = require("fs/promises");
+const path = require("path");
+const chalk = require("chalk").default;
 
-const DB_PATH = "./db.json";
+const notesPath = path.join(__dirname, "db.json");
 
-async function loadNotes() {
-    const data = await readFile(DB_PATH, "utf-8");
-    return JSON.parse(data).notes || [];
+async function addNote(title) {
+    const notes = await getNotes();
+    const note = {
+        title,
+        id: Date.now().toString(),
+    };
+
+    notes.push(note);
+
+    await saveNotes(notes);
+    console.log(chalk.bgGreen("Note added"));
+}
+
+async function getNotes() {
+    const notes = await fs.readFile(notesPath, { encoding: "utf-8" });
+    return Array.isArray(JSON.parse(notes)) ? JSON.parse(notes) : [];
 }
 
 async function saveNotes(notes) {
-    const data = { notes };
-    await writeFile(DB_PATH, JSON.stringify(data, null, 2));
+    await fs.writeFile(notesPath, JSON.stringify(notes));
 }
 
-export async function addNote(title) {
-    const notes = await loadNotes();
-    const note = { id: Date.now().toString(), title };
-    notes.push(note);
+async function editNote(id, newTitle) {
+    const notes = await getNotes();
+    const editingNoteIdx = notes.findIndex((note) => note.id === id);
+
+    notes[editingNoteIdx].title = newTitle;
+
     await saveNotes(notes);
-    console.log(chalk.green(`Note "${title}" added`));
+    console.log(chalk.bgYellow("Note updated"));
 }
 
-export async function getNotes() {
-    return await loadNotes();
+async function printNotes() {
+    const notes = await getNotes();
+
+    console.log(chalk.bgBlue("Here is the list of notes:"));
+    notes.forEach((note) => {
+        console.log(chalk.bgWhite(note.id), chalk.blue(note.title));
+    });
 }
 
-export async function updateNote(id, newTitle) {
-    const notes = await loadNotes();
-    const idx = notes.findIndex((n) => n.id === id);
-    if (idx !== -1) {
-        notes[idx].title = newTitle;
-        await saveNotes(notes);
-        console.log(chalk.blue(`Note ${id} updated to "${newTitle}"`));
+async function removeNote(noteId) {
+    const notes = await getNotes();
+    const newNotes = notes.filter(({ id }) => id !== noteId);
+
+    if (notes.length === newNotes.length) {
+        console.log(chalk.white(`Note with id: "${noteId}" was not found`));
+        return;
     }
+
+    await saveNotes(newNotes);
+    console.log(chalk.bgRed("Note removed"));
 }
 
-export async function removeNote(id) {
-    const notes = await loadNotes();
-    const filtered = notes.filter((n) => n.id !== id);
-    await saveNotes(filtered);
-    console.log(chalk.red(`Note ${id} removed`));
-}
+module.exports = {
+    addNote,
+    getNotes,
+    editNote,
+    printNotes,
+    removeNote,
+};

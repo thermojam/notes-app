@@ -1,50 +1,62 @@
-import express from "express";
-import path from "path";
-import chalk from "chalk";
-import { fileURLToPath } from "url";
-import {
-    getNotes,
+const express = require("express");
+const chalk = require("chalk").default;
+const path = require("path");
+const {
     addNote,
+    getNotes,
     removeNote,
-    updateNote,
-} from "./notes-controller.js";
+    editNote,
+} = require("./notes-controller");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
 const port = 3030;
+const app = express();
 
 app.set("view engine", "ejs");
-app.set("views", path.resolve(__dirname, "pages"));
+app.set("views", "pages");
 
 app.use(express.static(path.resolve(__dirname, "public")));
-app.use(express.urlencoded({ extended: true }));
+app.use(
+    express.urlencoded({
+        extended: true,
+    })
+);
 app.use(express.json());
 
 app.get("/", async (req, res) => {
     res.render("index", {
         title: "Express App",
         notes: await getNotes(),
+        created: false,
     });
 });
 
 app.post("/", async (req, res) => {
     await addNote(req.body.title);
-    res.redirect("/");
+    res.render("index", {
+        title: "Express App",
+        notes: await getNotes(),
+        created: true,
+    });
 });
 
 app.put("/:id", async (req, res) => {
-    const { title } = req.body;
-    await updateNote(req.params.id, title);
-    res.json({ success: true });
+    await editNote(req.params.id, req.body.title);
+    res.render("index", {
+        title: "Express App",
+        notes: await getNotes(),
+        created: false,
+    });
 });
 
 app.delete("/:id", async (req, res) => {
     await removeNote(req.params.id);
-    res.json({ success: true });
+    res.render("index", {
+        title: "Express App",
+        notes: await getNotes(),
+        created: false,
+    });
 });
 
 app.listen(port, () => {
-    console.log(chalk.green(`Server is running on http://localhost:${port}`));
+    console.log(chalk.green(`Server has been started on port ${port}...`));
 });
