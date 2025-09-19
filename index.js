@@ -1,12 +1,13 @@
 const express = require("express");
+const mongoose = require("mongoose")
 const chalk = require("chalk").default;
 const path = require("path");
 const {
     addNote,
     getNotes,
     removeNote,
-    editNote,
-} = require("./notes-controller");
+    updateNote,
+} = require("./notes-controller.js");
 
 const port = 3030;
 const app = express();
@@ -27,24 +28,37 @@ app.get("/", async (req, res) => {
         title: "Express App",
         notes: await getNotes(),
         created: false,
+        error: false,
     });
 });
 
 app.post("/", async (req, res) => {
-    await addNote(req.body.title);
-    res.render("index", {
-        title: "Express App",
-        notes: await getNotes(),
-        created: true,
-    });
+    try {
+        await addNote(req.body.title);
+        res.render("index", {
+            title: "Express App",
+            notes: await getNotes(),
+            created: true,
+            error: false,
+        });
+    } catch(e) {
+        console.log('Creation error', e)
+        res.render("index", {
+            title: "Express App",
+            notes: await getNotes(),
+            created: false,
+            error: true,
+        });
+    }
 });
 
 app.put("/:id", async (req, res) => {
-    await editNote(req.params.id, req.body.title);
+    await updateNote({ id: req.params.id, title: req.body.title });
     res.render("index", {
         title: "Express App",
         notes: await getNotes(),
         created: false,
+        error: false,
     });
 });
 
@@ -54,9 +68,17 @@ app.delete("/:id", async (req, res) => {
         title: "Express App",
         notes: await getNotes(),
         created: false,
+        error: false,
     });
 });
 
-app.listen(port, () => {
-    console.log(chalk.green(`Server has been started on port ${port}...`));
+// Mongoose делает работу с MongoDB в Node.js удобной, структурированной и безопасной
+mongoose
+    .connect(
+        "mongodb+srv://thermojam:fatal80nus@cluster0.3bqsxtj.mongodb.net/notes?retryWrites=true&w=majority&appName=Cluster0"
+    )
+    .then(() => {
+        app.listen(port, () => {
+            console.log(chalk.green(`Server is running on port ${port} ...`));
+    });
 });
