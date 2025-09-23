@@ -10,7 +10,6 @@ const {
     updateNote,
 } = require("./notes-controller.js");
 
-const port = 3030;
 const app = express();
 
 app.set("view engine", "ejs");
@@ -79,7 +78,7 @@ mongoose
         process.env.MONGODB_CONNECTION_STRING
     )
     .then(() => {
-        app.listen(port, () => {
-            console.log(chalk.green(`Server is running on port ${port} ...`));
+        app.listen(process.env.PORT, () => {
+            console.log(chalk.green(`Server is running on port ${process.env.PORT} ...`));
     });
 });
