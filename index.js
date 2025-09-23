@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose")
+const cookieParser = require("cookie-parser")
 const chalk = require("chalk").default;
 const path = require("path");
 const {
@@ -9,6 +10,7 @@ const {
     removeNote,
     updateNote,
 } = require("./notes-controller.js");
+const { addUser, loginUser } = require('./users-controller');
 
 const app = express();
 
@@ -16,12 +18,65 @@ app.set("view engine", "ejs");
 app.set("views", "pages");
 
 app.use(express.static(path.resolve(__dirname, "public")));
+app.use(express.json());
+// middleware (предварительная обработка) для express
+app.use(cookieParser());
 app.use(
     express.urlencoded({
         extended: true,
     })
 );
-app.use(express.json());
+
+app.get("/register", async (req, res) => {
+    res.render("register", {
+        title: "Express App",
+        error: undefined,
+    });
+});
+
+app.post("/register", async (req, res) => {
+    try {
+        await addUser(req.body.email, req.body.password);
+
+        res.redirect('/login')
+    } catch (e) {
+        if (e.code === 11000) {
+            res.render("register", {
+                title: "Express App",
+                error: 'Email is already registered'
+            });
+        }
+
+        console.log('error', e)
+        res.render("register", {
+            title: "Express App",
+            error: e.message,
+        });
+    }
+});
+
+app.get("/login", async (req, res) => {
+
+    res.render("login", {
+        title: "Express App",
+        error: undefined,
+    });
+});
+
+app.post("/login", async (req, res) => {
+    try {
+        const token = await loginUser(req.body.email, req.body.password);
+
+        res.cookie('token', token);
+
+        res.redirect('/');
+    } catch (e) {
+        res.render("login", {
+            title: "Express App",
+            error: e.message,
+        });
+    }
+})
 
 app.get("/", async (req, res) => {
     res.render("index", {
