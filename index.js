@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose")
 const chalk = require("chalk").default;
@@ -75,7 +76,7 @@ app.delete("/:id", async (req, res) => {
 // Mongoose делает работу с MongoDB в Node.js удобной, структурированной и безопасной
 mongoose
     .connect(
-        "mongodb+srv://thermojam:fatal80nus@cluster0.3bqsxtj.mongodb.net/notes?retryWrites=true&w=majority&appName=Cluster0"
+        process.env.MONGODB_CONNECTION_STRING
     )
     .then(() => {
         app.listen(port, () => {
