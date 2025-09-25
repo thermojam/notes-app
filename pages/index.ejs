@@ -14,11 +14,11 @@
         <title><%= title %></title>
     </head>
     <body>
+        <%- include('./partials/user-header') %>
+
         <% if (created) {%>
         <div class="alert alert-success">Note has been created!</div>
-        <% } %>
-
-        <% if (error) {%>
+        <% } %> <% if (error) {%>
         <div class="alert alert-danger">Something went wrong!</div>
         <% } %>
 
@@ -45,7 +45,13 @@
                     <li
                         class="list-group-item d-flex justify-content-between align-items-center"
                     >
-                        <%= notes[i].title %>
+                        <span> <%= notes[i].title %> </span>
+                        <span class="text-primary">
+                            <%= notes[i].owner %>
+                        </span>
+
+                        <% if (notes[i].owner === userEmail) { %>
+
                         <div>
                             <button
                                 class="btn btn-warning me-2"
@@ -62,6 +68,7 @@
                                 &times;
                             </button>
                         </div>
+                        <% } %>
                     </li>
                     <% } %>
                 </ul>

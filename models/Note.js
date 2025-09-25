@@ -4,6 +4,11 @@ const NoteSchema = mongoose.Schema({
     title: {
         type: String,
         required: true
+    },
+
+    owner: {
+        type: String,
+        required: true
     }
 });
 
